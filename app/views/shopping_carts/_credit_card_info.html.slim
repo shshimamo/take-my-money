@@ -1,3 +1,11 @@
+-# クライアント側の責任
+-#   - 顧客が無効なデータ(無効なクレジットカード、カード番号、過去の有効期限、不良CVC)をStripeAPIサーバーに送信するのを防ぐ
+-#   - トークンAPIコールでエラーが発生した場合購入が停止されたことを顧客に通知する
+-# 具体的なバリデーション
+-#   - クレジットカード番号: 16桁の長さに制限、
+-#   - 有効期限: 長さ制限、入力は数字であること
+-#   - CVC: 長さ制限、
+
 - if @cart.is_a?(ShoppingCart)
   h3 Shipping Info
   - if @cart.address.present?
@@ -9,7 +17,7 @@
 h3 Payment Options
 
 = form_tag(discount_codes_path, id: "discount-code-form") do
-  
+
   .form-group
     .col-sm-2
       = label_tag(:discount_code, "Discount Code", class: "control-label")
@@ -64,7 +72,7 @@ h3 Payment Options
         class: "payment-type-radio", id: "invoice_radio")
 
   .bg-danger#error-text
-  
+
   - if current_user.admin?
     #admin_credit_card_info
       h3 Administrator info

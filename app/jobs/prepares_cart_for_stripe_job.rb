@@ -1,12 +1,13 @@
 class PreparesCartForStripeJob < ApplicationJob
 
   queue_as :default
-  
+
+  # rescue_from メソッドは例外クラスとブロックを引数にとります。そのクラスの例外が発生した場合、ブロックが呼び出され、その例外はデフォルトでは飲み込まれます。ジョブを再キューに入れたい場合は、ブロック内から例外 (または任意の例外) を再度発生させることができます。
   rescue_from(ChargeSetupValidityException) do |exception|
     PaymentMailer.notify_failure(exception).deliver_later
     Rollbar.error(exception)
   end
-  
+
   rescue_from(PreExistingPaymentException) do |exception|
     Rollbar.error(exception)
   end
@@ -25,15 +26,15 @@ class PreparesCartForStripeJob < ApplicationJob
       shopping_cart: shopping_cart)
     purchases_cart_workflow.run
   end
-  
+
   def success
     true
   end
-  
+
   def redirect_on_success_url
     nil
   end
-  
+
   private def card_params(params)
     params.slice(
       :credit_card_number, :expiration_month,

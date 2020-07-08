@@ -1,14 +1,16 @@
 module StripeHandler
-  
+
+  # これまでのところ存在している購読プロセスでは、invoice.payment_succeededイベントを取得したい。今のところサブスクリプションの金額を調整する理由がないので、invoice.createdイベントはあまり興味がありませんし、charge.succeededイベントはキャッチするには広すぎるイベントのように思えます。(Stripeはサブスクリプションに関連したものだけでなく、チャージが成功するたびにコールバックを送信します)。
+  # このイベントの捕捉を開始するために必要なのは、適切な名前のクラスを作成することです。そして、コンストラクタの引数としてイベントを受け取り、実行メッセージに応答し、最後に成功に応答する必要があります。
   class InvoicePaymentSucceeded
-    
+
     attr_accessor :event, :success, :payment
-    
+
     def initialize(event)
       @event = event
       @success = false
     end
-    
+
     def run
       Subscription.transaction do
         return unless event
@@ -24,19 +26,19 @@ module StripeHandler
         @success = true
       end
     end
-    
+
     def invoice
       @event.data.object
     end
-    
+
     def subscription
       @subscription ||= Subscription.find_by(remote_id: invoice.subscription)
     end
-    
+
     def user
       @user ||= User.find_by(stripe_id: invoice.customer)
     end
-    
+
     def charge
       @charge ||= Stripe::Charge.retrieve(invoice.charge)
     end
